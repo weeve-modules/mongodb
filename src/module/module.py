@@ -4,16 +4,19 @@ Data outputting should happen here.
 
 Edit this file to implement your module.
 """
-
+from pymongo import MongoClient
+from os import getenv
 from logging import getLogger
 
 log = getLogger("module")
 
+# connect to MongoDB
+client = MongoClient(getenv('MONGO_URI'))
+collection = client[str(getenv('DATABASE_NAME'))][str(getenv('COLLECTION_NAME'))]
 
 def module_main(received_data: any) -> str:
     """
-    Send received data to the next module by implementing module's main logic.
-    Function description should not be modified.
+    Send data to MongoDB.
 
     Args:
         received_data (any): Data received by module and validated.
@@ -26,7 +29,12 @@ def module_main(received_data: any) -> str:
     log.debug("Outputting ...")
 
     try:
-        # YOUR CODE HERE
+        if type(received_data) == list:
+            # MongoDB accepts only single JSON data
+            for data in received_data:
+                collection.insert_one(data)
+        else:
+            collection.insert_one(received_data)
 
         return None
 
